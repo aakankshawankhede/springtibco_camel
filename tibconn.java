@@ -1,30 +1,31 @@
 package com.example.config;
 
 import javax.jms.ConnectionFactory;
-import javax.jms.QueueConnectionFactory;
 import org.apache.camel.component.jms.JmsComponent;
 import org.apache.camel.component.jms.JmsConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.connection.CachingConnectionFactory;
+import org.springframework.jndi.JndiTemplate;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import java.util.Hashtable;
+import java.util.Properties;
 
 @Configuration
 public class TibcoJmsConfig {
 
+    @Bean(name = "jndiTemplate")
+    public JndiTemplate jndiTemplate() {
+        Properties env = new Properties();
+        env.setProperty("java.naming.factory.initial", "com.tibco.tibjms.naming.TibjmsInitialContextFactory");
+        env.setProperty("java.naming.provider.url", "tcp://localhost:7222");
+        env.setProperty("java.naming.security.principal", "your-username");
+        env.setProperty("java.naming.security.credentials", "your-password");
+        return new JndiTemplate(env);
+    }
+
     @Bean(name = "tibcoConnectionFactory")
-    public ConnectionFactory tibcoConnectionFactory() throws Exception {
-        Hashtable<String, String> env = new Hashtable<>();
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.tibco.tibjms.naming.TibjmsInitialContextFactory");
-        env.put(Context.PROVIDER_URL, "tcp://localhost:7222");
-        env.put(Context.SECURITY_PRINCIPAL, "your-username");
-        env.put(Context.SECURITY_CREDENTIALS, "your-password");
-        
-        InitialContext ctx = new InitialContext(env);
-        return (ConnectionFactory) ctx.lookup("ConnectionFactory");
+    public ConnectionFactory tibcoConnectionFactory(JndiTemplate jndiTemplate) throws Exception {
+        return (ConnectionFactory) jndiTemplate.lookup("ConnectionFactory");
     }
 
     @Bean(name = "cachingConnectionFactory")
