@@ -24,9 +24,12 @@ public class TibcoJmsConfig {
     }
 
     @Bean(name = "tibcoConnectionFactory")
-    public ConnectionFactory tibcoConnectionFactory(JndiTemplate jndiTemplate) throws Exception {
-        return (ConnectionFactory) jndiTemplate.lookup("ConnectionFactory");
-    }
+public ConnectionFactory tibcoConnectionFactory() {
+    TibjmsConnectionFactory factory = new TibjmsConnectionFactory("tcp://localhost:7222");
+    factory.setUserName("your-username");
+    factory.setUserPassword("your-password");
+    return factory;
+}
 
     @Bean(name = "cachingConnectionFactory")
     public CachingConnectionFactory cachingConnectionFactory(ConnectionFactory tibcoConnectionFactory) {
