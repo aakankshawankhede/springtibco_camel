@@ -23,12 +23,18 @@ public class TibcoJmsConfig {
         return new JndiTemplate(env);
     }
 
-    @Bean(name = "tibcoConnectionFactory")
-public ConnectionFactory tibcoConnectionFactory() {
-    TibjmsConnectionFactory factory = new TibjmsConnectionFactory("tcp://localhost:7222");
-    factory.setUserName("your-username");
-    factory.setUserPassword("your-password");
-    return factory;
+ @Bean(name = "tibcoConnectionFactory")
+public ConnectionFactory tibcoConnectionFactory(JndiTemplate jndiTemplate) throws Exception {
+    InitialContext ctx = new InitialContext(jndiTemplate.getEnvironment());
+    
+    // Print all available JNDI names
+    NamingEnumeration<NameClassPair> list = ctx.list("");
+    while (list.hasMore()) {
+        NameClassPair nc = list.next();
+        System.out.println("JNDI Entry: " + nc.getName() + " -> " + nc.getClassName());
+    }
+    
+    return (ConnectionFactory) ctx.lookup("ConnectionFactory");  // Update this after finding the correct name
 }
 
     @Bean(name = "cachingConnectionFactory")
